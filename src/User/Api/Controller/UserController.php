@@ -13,6 +13,7 @@ use App\User\Infrastructure\Repository\UserRepository;
 use App\User\Model\ValueObject\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Firebase\JWT\JWT;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,7 +55,7 @@ class UserController extends AbstractController
      */
     public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $encoder): JsonResponse
     {
-        $login = $this->serializer->deserialize($request->getContent(), Login::class, 'json');
+        $login = $this->deserializeJson($request->getContent(), Login::class);
         $user = $userRepository->findByEmail(new Email($login->email()));
         if (!$user || $user->getPassword() != $request->get('password')) {
             return new JsonResponse([
@@ -76,19 +77,23 @@ class UserController extends AbstractController
     }
 
     /**
+     * @IsGranted("ROLE_ADMIN"))
+     *
      * @Route("/api/user", name="register")
      */
     public function create(Request $request): JsonResponse
     {
-        $createUser = $this->deserializeJson($request->getContent(), CreateUser::class);
-        $this->em->transactional(function () use ($createUser) {
-            $this->handler->create($createUser);
+        $createUserCommand = $this->deserializeJson($request->getContent(), CreateUser::class);
+        $this->em->transactional(function () use ($createUserCommand) {
+            $this->handler->create($createUserCommand);
         });
 
         return new JsonResponse(['status' => 'ok']);
     }
 
     /**
+     * @IsGranted("ROLE_ADMIN"))
+     *
      * @Route("/api/user/delete", name="remove")
      */
     public function delete(Request $request): JsonResponse
@@ -141,6 +146,9 @@ class UserController extends AbstractController
         return new JsonResponse(['status' => 'ok']);
     }
 
+    /**
+     * @Route("/api/user/change-password", name="change_password")
+     */
     public function changePassword(Request $request, TokenStorageInterface $tokenStorage): JsonResponse
     {
         $user = $tokenStorage->getToken()->getUser();

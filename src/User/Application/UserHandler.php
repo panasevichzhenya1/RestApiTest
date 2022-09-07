@@ -26,12 +26,12 @@ class UserHandler
         $this->repository = $repository;
     }
 
-    public function create(CreateUser $createUser): void {
+    public function create(CreateUser $createUserCommand): void {
         $user = new User(
-            new Email($createUser->email),
-            new Name($createUser->firstName, $createUser->lastName),
-            new PhoneNumber($createUser->phoneNumber),
-            new Password($createUser->password)
+            new Email($createUserCommand->email),
+            new Name($createUserCommand->firstName, $createUserCommand->lastName),
+            new PhoneNumber($createUserCommand->phoneNumber),
+            new Password($createUserCommand->password)
         );
         $this->repository->save($user);
     }

@@ -38,13 +38,6 @@ class UserRepository
             ->getOneOrNullResult();
     }
 
-    private function createQueryBuilder() : QueryBuilder
-    {
-        return $this->em->createQueryBuilder()
-            ->select('u')
-            ->from(User::class, 'u');
-    }
-
     public function save(User $user): void
     {
         $this->em->persist($user);
@@ -53,5 +46,12 @@ class UserRepository
     public function remove(User $user): void
     {
         $this->em->remove($user);
+    }
+
+    private function createQueryBuilder() : QueryBuilder
+    {
+        return $this->em->createQueryBuilder()
+            ->select('u')
+            ->from(User::class, 'u');
     }
 }

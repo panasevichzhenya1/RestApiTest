@@ -46,6 +46,11 @@ class User implements UserInterface {
      */
     private $password;
 
+    /**
+     * @ORM\Column(name="roles", type="json", length=255)
+     */
+    private $roles = [];
+
     public function __construct(Email $email, Name $name, PhoneNumber $phoneNumber, Password $password)
     {
         $this->id = new UserId();
@@ -94,9 +99,12 @@ class User implements UserInterface {
 
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
 
+        return array_unique($roles);
     }
 
     public function getPassword()
